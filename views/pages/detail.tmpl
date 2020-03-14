@@ -1,0 +1,13 @@
+{{template "layout" .}}
+
+{{define "main"}}
+    <div class="row px-lg-5">
+        <div class="col-md-12 blog-main">
+            <div class="blog-post">
+                <h2 class="blog-post-title">{{.Article.Title}}</h2>
+                <p class="blog-post-meta">December 23, 2013 by <a href="#">Jacob</a></p>
+                <p>{{.Article.Description}}</p>
+            </div><!-- /.blog-post -->
+        </div><!-- /.blog-main -->
+    </div>
+{{end}}

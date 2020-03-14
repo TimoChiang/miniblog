@@ -1,0 +1,18 @@
+{{template "layout" .}}
+
+{{define "main"}}
+    <div class="mb-6 text-center">
+        <form class="form-signin" action="/login" method="post">
+            <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+            {{ if .Errors}}
+                <h4>ERROR!{{.Errors}} </h4>
+            {{end}}
+            <label for="inputName" class="sr-only">Name</label>
+            <input type="text" for="inputName" name="name" class="form-control" placeholder="Name" required="" autofocus="">
+            <label for="inputPassword" class="sr-only">Password</label>
+            <input type="password" id="inputPassword" name="password" class="form-control" placeholder="Password" required="">
+            <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+            <p class="mt-5 mb-3 text-muted">© 2020</p>
+        </form>
+    </div>
+{{end}}

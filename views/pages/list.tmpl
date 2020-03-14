@@ -1,0 +1,20 @@
+{{template "layout" .}}
+
+{{define "main"}}
+    <div class="row">
+        <div class="col-md-12 blog-main">
+            {{range $index, $article := .Articles}}
+                <div class="blog-post">
+                    <h2 class="blog-post-title"><a href="/article/{{.Id}}" class="text-dark">{{.Title}}</a></h2>
+                    <p class="blog-post-meta">December 23, 2013 by <a href="#">Jacob</a></p>
+
+                    <p>{{.Description}}</p>
+                </div><!-- /.blog-post -->
+            {{end}}
+            <nav class="blog-pagination">
+                <a class="btn btn-outline-primary" href="#">Older</a>
+                <a class="btn btn-outline-secondary disabled" href="#" tabindex="-1" aria-disabled="true">Newer</a>
+            </nav>
+        </div><!-- /.blog-main -->
+    </div>
+{{end}}
