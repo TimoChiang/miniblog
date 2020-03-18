@@ -2,25 +2,25 @@ package controller
 
 import (
 	"fmt"
+	"miniblog/domain/service"
 	"net/http"
 	"time"
 )
 
-
-type ReqDS struct {
-	Name string
-	Password    string
+type UserHandler struct {
+	Base
+	Service *service.UserService
 }
 
 type LoginPageData struct {
 	BlogName string
 	Errors string
-	User *User
+	User *service.User
 }
 
-func SignIn (w http.ResponseWriter, r *http.Request) {
-	if user := GetUser(r); user == nil {
-		t := loadPageTemplate("login")
+func (h *UserHandler) SignIn(w http.ResponseWriter, r *http.Request) {
+	if user := h.Service.GetUser(r); user == nil {
+		t := h.LoadPageTemplate("login")
 		data := LoginPageData{BLOG_NAME, "", user}
 		if err := t.Execute(w, data); err != nil {
 			fmt.Printf("execute template fail: %v\n", err)
@@ -32,7 +32,7 @@ func SignIn (w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func PostSignIn (w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) PostSignIn (w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		fmt.Printf("get post data fail: %v\n", err)
 		return
@@ -45,8 +45,8 @@ func PostSignIn (w http.ResponseWriter, r *http.Request) {
 
 	//TODO: Validation
 	if name != "demo" || password != "demo" {
-		t := loadPageTemplate("login")
-		data := LoginPageData{BLOG_NAME, "Please check your name and password", GetUser(r)}
+		t := h.LoadPageTemplate("login")
+		data := LoginPageData{BLOG_NAME, "Please check your name and password", h.Service.GetUser(r)}
 		if err := t.Execute(w, data); err != nil {
 			fmt.Printf("execute template fail: %v\n", err)
 		}
@@ -57,8 +57,8 @@ func PostSignIn (w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func SignOut (w http.ResponseWriter, r *http.Request){
-	if user := GetUser(r); user != nil {
+func (h *UserHandler) SignOut (w http.ResponseWriter, r *http.Request){
+	if user := h.Service.GetUser(r); user != nil {
 		deleteCookie(w)
 	}else{
 		fmt.Printf("now not login! \n", )

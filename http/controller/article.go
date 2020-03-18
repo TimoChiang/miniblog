@@ -3,37 +3,49 @@ package controller
 import (
 	"fmt"
 	"github.com/gorilla/mux"
-	m "miniblog/models"
+	"miniblog/domain/models"
+	"miniblog/domain/service"
 	"net/http"
 	"strconv"
 )
 
+type ArticleHandler struct {
+	Base
+	Service *service.ArticleService
+	UserService *service.UserService
+}
 
-func GetArticle (w http.ResponseWriter, r *http.Request) {
+type NewArticlePageData struct {
+	BlogName string
+	Errors string
+	User *service.User
+}
+
+func (h *ArticleHandler) GetArticle (w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
 		fmt.Printf("convert id fail: %v\n", err)
 		return
 	}
-	article, err := m.GetSingleArticle(id)
+	article, err := h.Service.GetArticle(id)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
-		t := loadPageTemplate("404")
+		t := h.LoadPageTemplate("404")
 		t.Execute(w, nil)
 		return
 	}
 
-	t := loadPageTemplate("detail")
+	t := h.LoadPageTemplate("detail")
 
 	data := struct {
 		BlogName string
-		Article *m.Article
-		User *User
+		Article *models.Article // is it good?
+		User *service.User
 	}{
 		BLOG_NAME,
 		article,
-		GetUser(r),
+		h.UserService.GetUser(r),
 
 	}
 
@@ -42,25 +54,25 @@ func GetArticle (w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func GetArticles (w http.ResponseWriter, r *http.Request) {
-	articles, err := m.GetAllArticle()
+func (h *ArticleHandler) GetArticles (w http.ResponseWriter, r *http.Request) {
+	articles, err := h.Service.GetAllArticle()
 	if err != nil {
 		fmt.Printf("get articles fail: %v\n", err)
 		w.WriteHeader(http.StatusNotFound)
-		t := loadPageTemplate("404")
+		t := h.LoadPageTemplate("404")
 		t.Execute(w, nil)
 	}
 
-	t := loadPageTemplate("list")
+	t := h.LoadPageTemplate("list")
 
 	data := struct {
 		BlogName string
-		Articles map[int]*m.Article
-		User *User
+		Articles map[int]*models.Article
+		User *service.User
 	}{
 		BLOG_NAME,
 		articles,
-		GetUser(r),
+		h.UserService.GetUser(r),
 	}
 
 	if err := t.Execute(w, data); err != nil {
@@ -69,10 +81,10 @@ func GetArticles (w http.ResponseWriter, r *http.Request) {
 
 }
 
-func NewArticle (w http.ResponseWriter, r *http.Request) {
-	if user := GetUser(r); user != nil {
-		t := loadPageTemplate("create")
-		data := LoginPageData{BLOG_NAME, "", user}
+func (h *ArticleHandler) NewArticle (w http.ResponseWriter, r *http.Request) {
+	if user := h.UserService.GetUser(r); user != nil {
+		t := h.LoadPageTemplate("create")
+		data := NewArticlePageData{BLOG_NAME, "", user}
 		if err := t.Execute(w, data); err != nil {
 			fmt.Printf("execute template fail: %v\n", err)
 		}
@@ -84,7 +96,7 @@ func NewArticle (w http.ResponseWriter, r *http.Request) {
 }
 
 
-func CreateArticle (w http.ResponseWriter, r *http.Request){
+func (h *ArticleHandler) CreateArticle (w http.ResponseWriter, r *http.Request){
 	if err := r.ParseForm(); err != nil {
 		fmt.Printf("get post data fail: %v\n", err)
 		return
@@ -96,7 +108,7 @@ func CreateArticle (w http.ResponseWriter, r *http.Request){
 	fmt.Printf("Password = %s\n", description)
 
 	//TODO: Validation
-	lastInsertID, err := m.CreateArticle(title, description)
+	lastInsertID, err := h.Service.CreateArticle(title, description)
 	if err != nil {
 		fmt.Printf("create article data fail: %v\n", err)
 		return
