@@ -16,7 +16,6 @@ type ArticleHandler struct {
 }
 
 type NewArticlePageData struct {
-	BlogName string
 	Errors string
 	User *service.User
 }
@@ -39,11 +38,9 @@ func (h *ArticleHandler) GetArticle (w http.ResponseWriter, r *http.Request) {
 	t := h.LoadPageTemplate("detail")
 
 	data := struct {
-		BlogName string
 		Article *models.Article // is it good?
 		User *service.User
 	}{
-		BLOG_NAME,
 		article,
 		h.UserService.GetUser(r),
 
@@ -66,11 +63,9 @@ func (h *ArticleHandler) GetArticles (w http.ResponseWriter, r *http.Request) {
 	t := h.LoadPageTemplate("list")
 
 	data := struct {
-		BlogName string
 		Articles map[int]*models.Article
 		User *service.User
 	}{
-		BLOG_NAME,
 		articles,
 		h.UserService.GetUser(r),
 	}
@@ -84,7 +79,7 @@ func (h *ArticleHandler) GetArticles (w http.ResponseWriter, r *http.Request) {
 func (h *ArticleHandler) NewArticle (w http.ResponseWriter, r *http.Request) {
 	if user := h.UserService.GetUser(r); user != nil {
 		t := h.LoadPageTemplate("create")
-		data := NewArticlePageData{BLOG_NAME, "", user}
+		data := NewArticlePageData{"", user}
 		if err := t.Execute(w, data); err != nil {
 			fmt.Printf("execute template fail: %v\n", err)
 		}

@@ -8,10 +8,7 @@ import (
 	"text/template"
 )
 
-type Base struct {
-}
-
-const BLOG_NAME  = "Timo's Blog!!"
+type Base struct {}
 
 func (b *Base) LoadPageTemplate(name string) *template.Template {
 	// must be first in allFiles

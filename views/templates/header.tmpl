@@ -1,10 +1,11 @@
 {{define "header"}}
+    {{$BlogName := "Timo's Blog!!"}}
     <html lang="en">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <meta name="description" content="">
-        <title>{{.BlogName}}</title>
+        <title>{{$BlogName}}</title>
 
         <!-- Bootstrap core CSS -->
         <link href="/assets/css/bootstrap.min.css" rel="stylesheet">
@@ -48,7 +49,7 @@
                     <div class="col-4 pt-1">
                     </div>
                     <div class="col-4 text-center">
-                        <a class="blog-header-logo text-dark" href="/">{{.BlogName}}</a>
+                        <a class="blog-header-logo text-dark" href="/">{{$BlogName}}</a>
                     </div>
                     <div class="col-4 d-flex justify-content-end align-items-center">
                         {{ if .User}}

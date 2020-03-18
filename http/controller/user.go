@@ -13,7 +13,6 @@ type UserHandler struct {
 }
 
 type LoginPageData struct {
-	BlogName string
 	Errors string
 	User *service.User
 }
@@ -21,7 +20,7 @@ type LoginPageData struct {
 func (h *UserHandler) SignIn(w http.ResponseWriter, r *http.Request) {
 	if user := h.Service.GetUser(r); user == nil {
 		t := h.LoadPageTemplate("login")
-		data := LoginPageData{BLOG_NAME, "", user}
+		data := LoginPageData{"", user}
 		if err := t.Execute(w, data); err != nil {
 			fmt.Printf("execute template fail: %v\n", err)
 		}
@@ -46,7 +45,7 @@ func (h *UserHandler) PostSignIn (w http.ResponseWriter, r *http.Request) {
 	//TODO: Validation
 	if name != "demo" || password != "demo" {
 		t := h.LoadPageTemplate("login")
-		data := LoginPageData{BLOG_NAME, "Please check your name and password", h.Service.GetUser(r)}
+		data := LoginPageData{"Please check your name and password", h.Service.GetUser(r)}
 		if err := t.Execute(w, data); err != nil {
 			fmt.Printf("execute template fail: %v\n", err)
 		}
