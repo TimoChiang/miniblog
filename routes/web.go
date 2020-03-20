@@ -11,6 +11,7 @@ import (
 func InitialRouters() *mux.Router{
 	router := mux.NewRouter()
 	router.PathPrefix("/assets/").Handler(http.StripPrefix("/assets/", http.FileServer(http.Dir("./public/assets"))))
+	router.HandleFunc("/health_check", c.CheckHealth).Methods("GET")
 	return router
 }
 

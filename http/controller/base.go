@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"strings"
 	"text/template"
 )
@@ -30,4 +31,8 @@ func (b *Base) LoadPageTemplate(name string) *template.Template {
 		log.Fatal(err)
 	}
 	return ts
+}
+
+func CheckHealth (w http.ResponseWriter, r *http.Request){
+	fmt.Fprintf(w, "I'm fine!")
 }
