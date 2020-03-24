@@ -51,6 +51,7 @@ func TestRoutingWithLaunchedServer(t *testing.T) {
 
 	// read the body into a bunch of bytes (b)
 	b, err := ioutil.ReadAll(res.Body)
+	res.Body.Close()
 	if err != nil {
 		t.Errorf("could not read body: %v", err)
 	}

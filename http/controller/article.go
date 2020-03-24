@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"github.com/gorilla/mux"
+	"log"
 	"miniblog/domain/models"
 	"miniblog/domain/service"
 	"net/http"
@@ -30,13 +31,18 @@ func (h *ArticleHandler) GetArticle (w http.ResponseWriter, r *http.Request) {
 	article, err := h.Service.GetArticle(id)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
-		t := h.LoadPageTemplate("404")
+		t, err := h.LoadPageTemplate("404")
+		if err != nil {
+			log.Panicln(err)
+		}
 		t.Execute(w, nil)
 		return
 	}
 
-	t := h.LoadPageTemplate("detail")
-
+	t, err := h.LoadPageTemplate("detail")
+	if err != nil {
+		log.Panicln(err)
+	}
 	data := struct {
 		Article *models.Article // is it good?
 		User *service.User
@@ -56,11 +62,17 @@ func (h *ArticleHandler) GetArticles (w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Printf("get articles fail: %v\n", err)
 		w.WriteHeader(http.StatusNotFound)
-		t := h.LoadPageTemplate("404")
+		t, err := h.LoadPageTemplate("404")
+		if err != nil {
+			log.Panicln(err)
+		}
 		t.Execute(w, nil)
 	}
 
-	t := h.LoadPageTemplate("list")
+	t, err := h.LoadPageTemplate("list")
+	if err != nil {
+		log.Panicln(err)
+	}
 
 	data := struct {
 		Articles map[int]*models.Article
@@ -78,7 +90,10 @@ func (h *ArticleHandler) GetArticles (w http.ResponseWriter, r *http.Request) {
 
 func (h *ArticleHandler) NewArticle (w http.ResponseWriter, r *http.Request) {
 	if user := h.UserService.GetUser(r); user != nil {
-		t := h.LoadPageTemplate("create")
+		t, err := h.LoadPageTemplate("create")
+		if err != nil {
+			log.Panicln(err)
+		}
 		data := NewArticlePageData{"", user}
 		if err := t.Execute(w, data); err != nil {
 			fmt.Printf("execute template fail: %v\n", err)

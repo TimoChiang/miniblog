@@ -3,7 +3,6 @@ package controller
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strings"
 	"text/template"
@@ -11,14 +10,14 @@ import (
 
 type Base struct {}
 
-func (b *Base) LoadPageTemplate(name string) *template.Template {
+func (b *Base) LoadPageTemplate(name string) (*template.Template, error) {
 	// must be first in allFiles
 	allFiles := []string{
 		"./views/pages/" + name + ".tmpl",
 	}
 	files, err := ioutil.ReadDir("./views/templates")
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
 	for _, file := range files {
 		filename := file.Name()
@@ -28,9 +27,9 @@ func (b *Base) LoadPageTemplate(name string) *template.Template {
 	}
 	ts, err := template.ParseFiles(allFiles...)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
-	return ts
+	return ts, nil
 }
 
 func CheckHealth (w http.ResponseWriter, r *http.Request){

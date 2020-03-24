@@ -17,7 +17,10 @@ func init() {
 func TestLoadPageTemplate(t *testing.T) {
 	base := new(Base)
 	mainFileName := "login"
-	template := base.LoadPageTemplate(mainFileName)
+	template, err := base.LoadPageTemplate(mainFileName)
+	if err != nil {
+		t.Errorf("load template error: %v", err)
+	}
 	allFiles := map[string]bool{}
 	for _, file := range template.Templates() {
 		allFiles[file.ParseName] = true
@@ -39,5 +42,21 @@ func TestLoadPageTemplate(t *testing.T) {
 	//check if load expected file
 	if _, ok := allFiles[mainFileName + ".tmpl"]; ok == false  {
 		t.Errorf("file '%v' should be load but not found in templates", mainFileName)
+	}
+}
+
+func TestLoadNotExistTemplate(t *testing.T) {
+	base := new(Base)
+	mainFileName := "non-existent"
+	_, err := base.LoadPageTemplate(mainFileName)
+
+	// check err is exist
+	if err == nil {
+		t.Fatalf("expeceted load template %s error but OK", mainFileName)
+	}
+
+	// check error message
+	if err.Error() != "open ./views/pages/"+ mainFileName +".tmpl: no such file or directory" {
+		t.Errorf("expeceted load template %s not found but get this err:%v", mainFileName, err)
 	}
 }
