@@ -5,7 +5,6 @@ import (
 	"log"
 	"miniblog/domain/service"
 	"net/http"
-	"time"
 )
 
 type UserHandler struct {
@@ -32,13 +31,11 @@ func (h *UserHandler) SignIn(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("already sing in finish! \n", )
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	}
-	return
 }
 
 func (h *UserHandler) PostSignIn (w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
-		fmt.Printf("get post data fail: %v\n", err)
-		return
+		log.Fatalf("get post data fail: %v", err)
 	}
 	fmt.Printf("Post from website! r.PostFrom = %v\n", r.PostForm)
 	name := r.FormValue("name")
@@ -56,42 +53,19 @@ func (h *UserHandler) PostSignIn (w http.ResponseWriter, r *http.Request) {
 		if err := t.Execute(w, data); err != nil {
 			fmt.Printf("execute template fail: %v\n", err)
 		}
-		return
 	}
-	setCookie(w)
+	h.Service.SetCookie(w)
 	http.Redirect(w, r, "/", http.StatusSeeOther)
-	return
 }
 
 func (h *UserHandler) SignOut (w http.ResponseWriter, r *http.Request){
 	if user := h.Service.GetUser(r); user != nil {
-		deleteCookie(w)
+		h.Service.DeleteCookie(w)
 	}else{
 		fmt.Printf("now not login! \n", )
 	}
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
-	return
 }
 
-func setCookie(w http.ResponseWriter) {
-	c := http.Cookie{
-		Name:     "user",
-		Value:    "demo",
-		Path:     "/",
-		HttpOnly: true,
-		//Secure:   true,
-		MaxAge: 86400}
-	http.SetCookie(w, &c)
-	fmt.Printf("cookie is created! => %v\n", c)
-}
 
-func deleteCookie(w http.ResponseWriter) {
-	c := &http.Cookie{
-		Name:     "user",
-		Value:    "",
-		Path:     "/",
-		Expires: time.Unix(0, 0),
-		HttpOnly: true,
-	}
-	http.SetCookie(w, c)
-}
+

@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"net/http"
+	"time"
 )
 
 type UserService struct {
@@ -12,25 +13,44 @@ type UserService struct {
 type User struct {
 	Name string
 }
+const cookieName = "user"
 
 func (s *UserService) GetUser(r *http.Request) *User{
 	var user *User
-	fmt.Printf("NOW user: %v\n", user)
-	cookie, err := r.Cookie("user")
+	cookie, err := r.Cookie(cookieName)
+	// TODO: cookie encode
 	if err != nil {
 		fmt.Printf("get cookie failed err:%v\n", err)
-		user = nil
-		fmt.Printf("user reset: %v\n", user)
 	}else{
 		fmt.Printf("get cookie: %v\n", cookie.Value)
-		if user == nil {
-			user = new(User)
-			user.Name = cookie.Value
-			fmt.Printf("user init: %v\n", user)
-		}else if user != nil && user.Name != cookie.Value {
-			fmt.Printf("cookie user is wrong with data!! cookie user: %v , local user: %v \n", cookie.Value, user.Name)
-			user.Name = cookie.Value
-		}
+		user = new(User)
+		user.Name = cookie.Value
+		fmt.Printf("initialize user : %v\n", user)
 	}
 	return user
+}
+
+func (s *UserService) SetCookie(w http.ResponseWriter) {
+	c := &http.Cookie{
+		Name:     cookieName,
+		Value:    "demo",
+		Path:     "/",
+		HttpOnly: true,
+		//Secure:   true,
+		MaxAge: 86400}
+	http.SetCookie(w, c)
+	fmt.Printf("cookie is created! => %v\n", c)
+}
+
+func (s *UserService) DeleteCookie(w http.ResponseWriter) {
+	c := &http.Cookie{
+		Name:     cookieName,
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		Expires: time.Unix(0, 0),
+		MaxAge: 0,
+	}
+	http.SetCookie(w, c)
+	fmt.Println("cookie is deleted!")
 }
