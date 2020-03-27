@@ -17,8 +17,6 @@ type articleRepository struct {
 }
 
 func NewArticleRepository(db *sql.DB) ArticleRepository {
-	repo := articleRepository{db}
-	repo.GetArticle(1)
 	return &articleRepository{db}
 }
 
