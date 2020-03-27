@@ -14,8 +14,13 @@ func (r *ArticleRepository) GetArticle(id int) (*models.Article, error){
 	article := new(models.Article)
 	row := r.Db.QueryRow("select id, title, description from articles where id=?", id)
 	if err := row.Scan(&article.Id, &article.Title, &article.Description); err != nil {
-		fmt.Printf("scan failed, err:%v\n", err)
-		return article, err
+		if err == sql.ErrNoRows {
+			fmt.Println("no row match conditions")
+			return nil, nil
+		}else{
+			fmt.Printf("scan failed, err: %v\n", err)
+			return nil, err
+		}
 	}
 	fmt.Println("Single row data:", *article)
 	return article, nil

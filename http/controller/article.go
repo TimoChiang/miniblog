@@ -30,30 +30,35 @@ func (h *ArticleHandler) GetArticle (w http.ResponseWriter, r *http.Request) {
 	}
 	article, err := h.Service.GetArticle(id)
 	if err != nil {
+		log.Panicln(err)
+	}
+	if article != nil {
+		t, err := h.LoadPageTemplate("detail")
+		if err != nil {
+			log.Panicln(err)
+		}
+		data := struct {
+			Article *models.Article // is it good?
+			User *service.User
+		}{
+			article,
+			h.UserService.GetUser(r),
+		}
+
+		if err := t.Execute(w, data); err != nil {
+			fmt.Printf("execute template fail: %v\n", err)
+		}
+	}else{
+		// TODO 404 function
 		w.WriteHeader(http.StatusNotFound)
 		t, err := h.LoadPageTemplate("404")
 		if err != nil {
 			log.Panicln(err)
 		}
-		t.Execute(w, nil)
-		return
-	}
 
-	t, err := h.LoadPageTemplate("detail")
-	if err != nil {
-		log.Panicln(err)
-	}
-	data := struct {
-		Article *models.Article // is it good?
-		User *service.User
-	}{
-		article,
-		h.UserService.GetUser(r),
-
-	}
-
-	if err := t.Execute(w, data); err != nil {
-		fmt.Printf("execute template fail: %v\n", err)
+		if err := t.Execute(w, nil); err != nil {
+			fmt.Printf("execute template fail: %v\n", err)
+		}
 	}
 }
 
