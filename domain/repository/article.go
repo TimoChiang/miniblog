@@ -6,11 +6,23 @@ import (
 	"miniblog/domain/models"
 )
 
-type ArticleRepository struct {
+type ArticleRepository interface {
+	GetArticle(id int) (*models.Article, error)
+	GetAllArticle() (map[int]*models.Article, error)
+	CreateArticle(title, description string) (int64, error)
+}
+
+type articleRepository struct {
 	Db *sql.DB
 }
 
-func (r *ArticleRepository) GetArticle(id int) (*models.Article, error){
+func NewArticleRepository(db *sql.DB) ArticleRepository {
+	repo := articleRepository{db}
+	repo.GetArticle(1)
+	return &articleRepository{db}
+}
+
+func (r *articleRepository) GetArticle(id int) (*models.Article, error){
 	article := new(models.Article)
 	row := r.Db.QueryRow("select id, title, description from articles where id=?", id)
 	if err := row.Scan(&article.Id, &article.Title, &article.Description); err != nil {
@@ -26,7 +38,7 @@ func (r *ArticleRepository) GetArticle(id int) (*models.Article, error){
 	return article, nil
 }
 
-func (r *ArticleRepository) GetAllArticle() (map[int]*models.Article, error) {
+func (r *articleRepository) GetAllArticle() (map[int]*models.Article, error) {
 	articles := make(map[int]*models.Article)
 	rows, err := r.Db.Query("select id, title, description from articles")
 	if err != nil {
@@ -46,7 +58,7 @@ func (r *ArticleRepository) GetAllArticle() (map[int]*models.Article, error) {
 }
 
 
-func (r *ArticleRepository) CreateArticle(title, description string) (int64, error) {
+func (r *articleRepository) CreateArticle(title, description string) (int64, error) {
 	result, err := r.Db.Exec("insert INTO articles (title, description) values(?,?)", title, description)
 	if err != nil {
 		fmt.Printf("Insert failed,err:%v\n", err)

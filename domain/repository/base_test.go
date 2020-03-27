@@ -19,7 +19,7 @@ const (
 	DATABASE = "blog"
 )
 
-var articleRepo *ArticleRepository
+var articleRepo *articleRepository
 
 func setup() {
 	//DB initialize
@@ -32,7 +32,7 @@ func setup() {
 
 	db.SetConnMaxLifetime(100*time.Second)
 	db.SetMaxOpenConns(100)
-	articleRepo = new(ArticleRepository)
+	articleRepo = new(articleRepository)
 	articleRepo.Db = db
 	ensureTableExists()
 	prepareTestForArticle()

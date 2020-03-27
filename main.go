@@ -41,7 +41,8 @@ func main() {
 	routes.SetUserRouters(router, userHandler)
 
 	//Article
-	articleService := &service.ArticleService{Repo: &repository.ArticleRepository{Db: db}}
+	articleRepository := repository.NewArticleRepository(db)
+	articleService := &service.ArticleService{Repo: articleRepository}
 	articleHandler := &c.ArticleHandler{Service: articleService, UserService:userService}
 	routes.SetArticleRouters(router, articleHandler)
 

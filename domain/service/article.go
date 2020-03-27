@@ -6,7 +6,7 @@ import (
 )
 
 type ArticleService struct {
-	Repo *repository.ArticleRepository
+	Repo repository.ArticleRepository
 }
 
 func (s *ArticleService) GetArticle(id int) (article *models.Article, err error){
