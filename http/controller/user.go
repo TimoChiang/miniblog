@@ -53,6 +53,7 @@ func (h *UserHandler) PostSignIn (w http.ResponseWriter, r *http.Request) {
 		if err := t.Execute(w, data); err != nil {
 			fmt.Printf("execute template fail: %v\n", err)
 		}
+		return
 	}
 	h.Service.SetCookie(w)
 	http.Redirect(w, r, "/", http.StatusSeeOther)
