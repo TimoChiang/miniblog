@@ -7,9 +7,8 @@ on:
     branches: [ master ]
 
 jobs:
-
-  build:
-    name: Build
+  test:
+    name: Test
     runs-on: ubuntu-latest
     steps:
 
@@ -29,6 +28,9 @@ jobs:
             curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
             dep ensure
         fi
+        
+    - name: Test
+      run: go test ./...
 
     - name: Build
       run: go build -v .
