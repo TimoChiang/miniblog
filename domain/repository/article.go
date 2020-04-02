@@ -9,7 +9,7 @@ import (
 type ArticleRepository interface {
 	GetArticle(id int) (*models.Article, error)
 	GetAllArticle() (map[int]*models.Article, error)
-	CreateArticle(title, description string) (int64, error)
+	CreateArticle(articleStruct *models.Article) (int64, error)
 }
 
 type articleRepository struct {
@@ -56,8 +56,8 @@ func (r *articleRepository) GetAllArticle() (map[int]*models.Article, error) {
 }
 
 
-func (r *articleRepository) CreateArticle(title, description string) (int64, error) {
-	result, err := r.Db.Exec("insert INTO articles (title, description) values(?,?)", title, description)
+func (r *articleRepository) CreateArticle(articleStruct *models.Article) (int64, error) {
+	result, err := r.Db.Exec("insert INTO articles (title, description) values(?,?)", articleStruct.Title, articleStruct.Description)
 	if err != nil {
 		fmt.Printf("Insert failed,err:%v\n", err)
 		return 0, err

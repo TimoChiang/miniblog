@@ -56,7 +56,7 @@ func TestArticleRepository_GetAllArticle(t *testing.T) {
 
 func TestArticleRepository_CreateArticle(t *testing.T) {
 	expected := &models.Article{Id: 3, Title: "test create title", Description: "test create description"}
-	lastInsertID, err := articleRepo.CreateArticle(expected.Title, expected.Description)
+	lastInsertID, err := articleRepo.CreateArticle(expected)
 	if err != nil {
 		t.Errorf("got error: %v", err)
 	}

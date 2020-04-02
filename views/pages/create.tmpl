@@ -1,18 +1,29 @@
 {{template "layout" .}}
 
 {{define "main"}}
-    <div class="mb-6 text-center">
-        <form class="form-signin" action="/articles" method="post">
-            <h1 class="h3 mb-3 font-weight-normal">create a new article</h1>
-            {{ if .Errors}}
-                <h4>ERROR!{{.Errors}} </h4>
-            {{end}}
-            <label for="inputTitle" class="sr-only">Title</label>
-            <input type="text" for="inputTitle" name="title" class="form-control" placeholder="Title" required="" autofocus="">
-            <label for="inputDescription" class="sr-only">Description</label>
-            <textarea id="inputDescription" name="description" class="form-control" placeholder="Description" required=""></textarea>
-            <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
-            <p class="mt-5 mb-3 text-muted">© 2020</p>
+    <div class="mb-6">
+        <form class="form-edit" action="/articles" method="post">
+            <div class="form-group">
+                <label for="inputTitle">Title</label>
+                <input type="text" name="title" class="form-control {{ if .Errors.Title}}is-invalid{{ end }}" id="inputTitle" placeholder="Title" value="{{ if .Inputs }}{{ .Inputs.Title }}{{ end }}">
+                {{ if .Errors.Title }}
+                    {{ range $value := .Errors.Title }}
+                    <div class="invalid-feedback">{{ $value }}</div>
+                    {{ end }}
+                {{ end }}
+            </div>
+            <div class="form-group">
+                <div class="form-group">
+                    <label for="inputDescription">Description</label>
+                    <textarea name="description" class="form-control {{ if .Errors.Description }}is-invalid{{ end }}" id="inputDescription" rows="3">{{ if .Inputs }}{{ .Inputs.Description }}{{ end }}</textarea>
+                    {{ if .Errors.Description }}
+                        {{ range $value := .Errors.Description }}
+                            <div class="invalid-feedback">{{ $value }}</div>
+                        {{ end }}
+                    {{ end }}
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">create a new article</button>
         </form>
     </div>
 {{end}}

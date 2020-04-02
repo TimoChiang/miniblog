@@ -26,9 +26,9 @@ func (r *ArticleRepository) GetAllArticle() (map[int]*models.Article, error) {
 	return mockArticles, nil
 }
 
-func (r *ArticleRepository) CreateArticle(title, description string) (int64, error) {
+func (r *ArticleRepository) CreateArticle(article *models.Article) (int64, error) {
 	count := len(mockArticles)
 	count++
-	mockArticles[count] = &models.Article{Id: count, Title: title, Description: description}
+	mockArticles[count] = &models.Article{Id: count, Title: article.Title, Description: article.Description}
 	return int64(count), nil
 }
