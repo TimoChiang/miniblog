@@ -10,16 +10,17 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:5.7
+        ports:
+          - 3307:3306
+        env:
+          MYSQL_DATABASE: blog
+          MYSQL_USER: user 
+          MYSQL_PASSWORD: password
+          MYSQL_ROOT_PASSWORD: root            
     steps:
-
-    - name: Setup MySQL
-      uses: mirromutth/mysql-action@v1.1
-      with:
-        host port: 3307 # Optional, default value is 3306. The port of host
-        mysql version: '5.7' # Optional, default value is "latest". The version of the MySQL
-        mysql database: 'blog' # Optional, default value is "test". The specified database which will be create
-        mysql user: 'user' # Required if "mysql root password" is empty, default is empty. The superuser for the specified database. Can use secrets, too
-        mysql password: 'password' # Required if "mysql user" exists. The password for the "mysql user"
 
     - name: Set up Go 1.13
       uses: actions/setup-go@v1
