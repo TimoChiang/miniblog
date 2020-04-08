@@ -3,10 +3,12 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	//"github.com/go-playground/validator/v10"
 	_ "github.com/go-sql-driver/mysql" // use _ to execute package's init function only
 	"log"
 	"miniblog/domain/repository"
 	"miniblog/domain/service"
+	"miniblog/domain/validator"
 	c "miniblog/http/controller"
 	"miniblog/routes"
 	"os"
@@ -42,7 +44,7 @@ func main() {
 
 	//Article
 	articleRepository := repository.NewArticleRepository(db)
-	articleService := &service.ArticleService{Repo: articleRepository}
+	articleService := &service.ArticleService{Repo: articleRepository, V: validator.NewValidator()}
 	articleHandler := &c.ArticleHandler{Service: articleService, UserService:userService}
 	routes.SetArticleRouters(router, articleHandler)
 

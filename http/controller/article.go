@@ -17,8 +17,9 @@ type ArticleHandler struct {
 }
 
 type NewArticlePageData struct {
-	Errors string
+	Errors map[string][]string
 	User *service.User
+	Inputs *models.Article
 }
 
 func (h *ArticleHandler) GetArticle (w http.ResponseWriter, r *http.Request) {
@@ -99,36 +100,50 @@ func (h *ArticleHandler) NewArticle (w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Panicln(err)
 		}
-		data := NewArticlePageData{"", user}
+		data := NewArticlePageData{nil, user, nil}
 		if err := t.Execute(w, data); err != nil {
 			fmt.Printf("execute template fail: %v\n", err)
 		}
 	}else{
 		fmt.Printf("please sign in before create article! \n", )
-		http.Redirect(w, r, "/login/", http.StatusSeeOther)
+		http.Redirect(w, r, "/login", http.StatusFound)
 	}
 	return
 }
 
-
 func (h *ArticleHandler) CreateArticle (w http.ResponseWriter, r *http.Request){
-	if err := r.ParseForm(); err != nil {
-		fmt.Printf("get post data fail: %v\n", err)
-		return
-	}
-	fmt.Printf("Post from website! r.PostFrom = %v\n", r.PostForm)
-	title := r.FormValue("title")
-	description := r.FormValue("description")
-	fmt.Printf("Name = %s\n", title)
-	fmt.Printf("Password = %s\n", description)
+	if user := h.UserService.GetUser(r); user != nil {
+		articleStruct, err := h.Service.LoadArticleStruct(r)
+		if err != nil {
+			fmt.Printf("get post data fail: %v\n", err)
+		}
 
-	//TODO: Validation
-	lastInsertID, err := h.Service.CreateArticle(title, description)
-	if err != nil {
-		fmt.Printf("create article data fail: %v\n", err)
-		return
+		// validation failed
+		if errorMessage := h.Service.V.Exec(articleStruct); errorMessage != nil {
+			fmt.Printf("get error message: %v\n", errorMessage)
+			data := NewArticlePageData{errorMessage, user, articleStruct}
+			w.WriteHeader(http.StatusUnprocessableEntity)
+			t, err := h.LoadPageTemplate("create")
+			if err != nil {
+				log.Panicln(err)
+			}
+
+			if err := t.Execute(w, data); err != nil {
+				fmt.Printf("execute template fail: %v\n", err)
+			}
+			return
+		}
+
+		// validation success, create article
+		lastInsertID, err := h.Service.CreateArticle(articleStruct)
+		if err != nil {
+			fmt.Printf("create article data fail: %v\n", err)
+			return
+		}
+		fmt.Printf("get last article id: %v\n", lastInsertID)
+		http.Redirect(w, r, "/article/" + strconv.Itoa(int(lastInsertID)), http.StatusSeeOther)
+	}else{
+		fmt.Printf("please sign in before create article! \n", )
+		http.Redirect(w, r, "/login", http.StatusFound)
 	}
-	fmt.Printf("get last article id: %v\n", lastInsertID)
-	http.Redirect(w, r, "/article/" + strconv.Itoa(int(lastInsertID)), http.StatusSeeOther)
-	return
 }

@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"miniblog/domain/mocks"
 	"miniblog/domain/service"
+	"miniblog/domain/validator"
 	c "miniblog/http/controller"
 	"net/http"
 	"net/http/httptest"
@@ -40,7 +41,7 @@ func setup() {
 
 	//Article
 	articleRepository := new(mocks.ArticleRepository)
-	articleService := &service.ArticleService{Repo: articleRepository}
+	articleService := &service.ArticleService{Repo: articleRepository, V: validator.NewValidator()}
 	articleHandler := &c.ArticleHandler{Service: articleService, UserService:userService}
 	SetArticleRouters(router, articleHandler)
 }
@@ -72,19 +73,25 @@ func TestHealthCheckHandler(t *testing.T) {
 func TestHandlerStatus(t *testing.T) {
 	var tests = []struct {
 		in  string
+		isLogin bool
 		out int
 	}{
-		{"/login", http.StatusOK},
-		{"/logout", http.StatusSeeOther},
-		{"/", http.StatusOK},
-		{"/article/1", http.StatusOK},
-		{"/articles/new", http.StatusSeeOther},
+		{"/login", false, http.StatusOK},
+		{"/logout", false, http.StatusSeeOther},
+		{"/", false, http.StatusOK},
+		{"/article/1", false, http.StatusOK},
+		{"/articles/new", true, http.StatusOK},
+		{"/articles/new", false, http.StatusFound},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.in, func(t *testing.T) {
 			r := httptest.NewRequest("GET", tt.in, nil)
 			w := httptest.NewRecorder()
+			if tt.isLogin == true {
+				http.SetCookie(w, &http.Cookie{Name: "user", Value: "demo"})
+				r.Header.Set("Cookie", w.Header()["Set-Cookie"][0])
+			}
 			router.ServeHTTP(w, r)
 			if w.Code != tt.out {
 				t.Errorf("expected status OK, got %v", w.Code)
@@ -97,20 +104,28 @@ func TestHandlerStatusPostForm(t *testing.T) {
 	var tests = []struct {
 		in  string
 		body url.Values
+		isLogin bool
 		out int
 	}{
-		{"/login", url.Values{"name":{"demo"}, "password":{"demo"}}, http.StatusSeeOther},
-		{"/login", url.Values{"name":{"abc"}, "password":{"ddd"}}, http.StatusOK},
-		{"/login", url.Values{}, http.StatusOK},
-		{"/articles", url.Values{"title":{"test title"}, "description":{"test description"}}, http.StatusSeeOther},
-		{"/articles", url.Values{}, http.StatusSeeOther},
+		{"/login", url.Values{"name":{"demo"}, "password":{"demo"}}, false, http.StatusSeeOther},
+		{"/login", url.Values{"name":{"abc"}, "password":{"ddd"}}, false, http.StatusOK},
+		{"/login", url.Values{}, false, http.StatusOK},
+		{"/articles", url.Values{"title":{"test title"}, "description":{"test description"}}, true, http.StatusSeeOther},
+		{"/articles", url.Values{}, true, http.StatusUnprocessableEntity},
+		{"/articles", url.Values{}, false, http.StatusFound},
+
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.in, func(t *testing.T) {
+			w := httptest.NewRecorder()
 			r := httptest.NewRequest("POST", tt.in, strings.NewReader(tt.body.Encode()))
 			r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-			w := httptest.NewRecorder()
+			if tt.isLogin == true {
+				http.SetCookie(w, &http.Cookie{Name: "user", Value: "demo"})
+				r.Header.Set("Cookie", w.Header()["Set-Cookie"][0])
+			}
+
 			router.ServeHTTP(w, r)
 			if w.Code != tt.out {
 				t.Errorf("expected status OK, got %v", w.Code)

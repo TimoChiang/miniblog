@@ -135,3 +135,9 @@ h1, h2, h3, h4, h5, h6 {
     border-top-left-radius: 0;
     border-top-right-radius: 0;
 }
+
+.form-edit {
+    max-width: 750px;
+    padding: 15px;
+    margin: auto;
+}
