@@ -62,9 +62,7 @@ func TestArticleService_CreateArticle(t *testing.T) {
 	if article == nil {
 		t.Fatalf("expected %v, got nil", *expected)
 	}
-	if *article != *expected {
-		t.Errorf("expected %v, got: %v", *expected, *article)
-	}
+	isArticleEqualExpected(t, article, expected)
 }
 
 func TestArticleService_LoadArticleStruct(t *testing.T) {
@@ -79,8 +77,30 @@ func TestArticleService_LoadArticleStruct(t *testing.T) {
 	if err != nil {
 		t.Errorf("got error: %v", err)
 	}
-	if *articleStruct != *expected {
-		t.Errorf("expected %v, got: %v", *expected, *articleStruct)
+	isArticleEqualExpected(t, articleStruct, expected)
+}
+
+func isArticleEqualExpected (t *testing.T, article, expected *models.Article) {
+	if article.Title != expected.Title {
+		t.Errorf("expected %v, got: %v", expected.Title, article.Title)
 	}
 
+	if article.Description != expected.Description {
+		t.Errorf("expected %v, got: %v", expected.Description, article.Description)
+	}
+
+	if article.Slug != expected.Slug {
+		t.Errorf("expected %v, got: %v", expected.Slug, article.Slug)
+	}
+
+	if len(article.Tags) != len(expected.Tags) {
+		t.Errorf("expected length %v, got: %v", len(expected.Tags), len(article.Tags))
+	}
+
+	for index, tag := range expected.Tags {
+		if *article.Tags[index] != *tag {
+			t.Errorf("expected %v, got: %v", *tag, *article.Tags[index])
+		}
+	}
 }
+

@@ -5,6 +5,7 @@ import (
 	"miniblog/domain/repository"
 	"miniblog/domain/validator"
 	"net/http"
+	"strings"
 )
 
 type ArticleService struct {
@@ -44,5 +45,12 @@ func (s *ArticleService) LoadArticleStruct(r *http.Request) (articleStruct *mode
 	articleStruct = new(models.Article)
 	articleStruct.Title = r.FormValue("title")
 	articleStruct.Description = r.FormValue("description")
+	articleStruct.Slug = r.FormValue("slug")
+	tags := strings.Split(r.FormValue("tags"), ",")
+	for _, name := range tags {
+		tag := new(models.Tag)
+		tag.Name = strings.TrimSpace(name)
+		articleStruct.Tags  = append(articleStruct.Tags, tag)
+	}
 	return articleStruct, nil
 }
