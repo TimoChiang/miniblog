@@ -72,7 +72,7 @@ func TestArticleRepository_CreateArticle(t *testing.T) {
 		expected *models.Article
 	}{
 		{"expected", &models.Article{Id: 3, Title: "test create title", Description: "test create description", Slug: "mySlug", Tags: expectedTags}},
-		{"expectedWithRequiredFields", &models.Article{Id: 4, Title: "test create title", Description: "test create description", Slug: "", Tags: []*models.Tag{}}},
+		{"expectedWithRequiredFields", &models.Article{Id: 4, Title: "test create title", Description: "test create description", Slug: "no empty Slug", Tags: []*models.Tag{}}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.in, func(t *testing.T) {
@@ -89,6 +89,17 @@ func TestArticleRepository_CreateArticle(t *testing.T) {
 			}
 			isArticleEqualExpected(t, article, tt.expected)
 		})
+	}
+}
+
+func TestArticleRepository_SlugExists(t *testing.T) {
+	existSlug := "test Slug"
+	if articleRepo.SlugExists(existSlug) != true {
+		t.Fatalf("expected %v exist and return true, got false", existSlug)
+	}
+	nonExistSlug := "nonExistSlug"
+	if articleRepo.SlugExists(nonExistSlug) != false {
+		t.Fatalf("expected %v not exist and return false, got true", existSlug)
 	}
 }
 

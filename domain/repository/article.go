@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"miniblog/domain/models"
 	"strings"
 )
@@ -11,6 +12,7 @@ type ArticleRepository interface {
 	GetArticle(id int) (*models.Article, error)
 	GetAllArticle() (map[int]*models.Article, error)
 	CreateArticle(articleStruct *models.Article) (int64, error)
+	SlugExists(slug string) bool
 }
 
 type articleRepository struct {
@@ -136,4 +138,14 @@ func (r *articleRepository) CreateArticle(articleStruct *models.Article) (int64,
 	}
 
 	return lastInsertID, nil
+}
+
+func (r *articleRepository) SlugExists(slug string) bool {
+	if err := r.Db.QueryRow("select slug from articles where slug=?", slug).Scan(&slug); err != nil {
+		if err != sql.ErrNoRows {
+			log.Print(err)
+		}
+		return false
+	}
+	return true
 }

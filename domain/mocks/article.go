@@ -32,3 +32,12 @@ func (r *ArticleRepository) CreateArticle(article *models.Article) (int64, error
 	mockArticles[count] = &models.Article{Id: count, Title: article.Title, Description: article.Description}
 	return int64(count), nil
 }
+
+func (r *ArticleRepository) SlugExists(slug string) bool {
+	for _, article := range mockArticles {
+		if article.Slug == slug {
+			return true
+		}
+	}
+	return false
+}
