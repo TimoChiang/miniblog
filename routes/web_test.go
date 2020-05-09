@@ -41,7 +41,7 @@ func setup() {
 
 	//Article
 	articleRepository := new(mocks.ArticleRepository)
-	articleService := &service.ArticleService{Repo: articleRepository, V: validator.NewValidator()}
+	articleService := &service.ArticleService{Repo: articleRepository, V: validator.NewValidator(articleRepository)}
 	articleHandler := &c.ArticleHandler{Service: articleService, UserService:userService}
 	SetArticleRouters(router, articleHandler)
 }
@@ -110,7 +110,7 @@ func TestHandlerStatusPostForm(t *testing.T) {
 		{"/login", url.Values{"name":{"demo"}, "password":{"demo"}}, false, http.StatusSeeOther},
 		{"/login", url.Values{"name":{"abc"}, "password":{"ddd"}}, false, http.StatusOK},
 		{"/login", url.Values{}, false, http.StatusOK},
-		{"/articles", url.Values{"title":{"test title"}, "description":{"test description"}}, true, http.StatusSeeOther},
+		{"/articles", url.Values{"title":{"test title"}, "description":{"test description"}, "slug":{"post test slug"}}, true, http.StatusSeeOther},
 		{"/articles", url.Values{}, true, http.StatusUnprocessableEntity},
 		{"/articles", url.Values{}, false, http.StatusFound},
 

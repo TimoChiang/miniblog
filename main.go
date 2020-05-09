@@ -44,7 +44,7 @@ func main() {
 
 	//Article
 	articleRepository := repository.NewArticleRepository(db)
-	articleService := &service.ArticleService{Repo: articleRepository, V: validator.NewValidator()}
+	articleService := &service.ArticleService{Repo: articleRepository, V: validator.NewValidator(articleRepository)}
 	articleHandler := &c.ArticleHandler{Service: articleService, UserService:userService}
 	routes.SetArticleRouters(router, articleHandler)
 

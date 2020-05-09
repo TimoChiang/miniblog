@@ -3,6 +3,7 @@ package validator
 import (
 	"fmt"
 	"github.com/go-playground/validator/v10"
+	"miniblog/domain/repository"
 )
 
 type Validator interface {
@@ -11,13 +12,21 @@ type Validator interface {
 
 type MyValidator struct {
 	*validator.Validate //combination package by anonymous
+	Repo repository.ArticleRepository
 }
 
-func NewValidator() Validator {
-	return &MyValidator{validator.New()}
+func NewValidator(articleRepository repository.ArticleRepository) Validator {
+	return &MyValidator{validator.New(), articleRepository}
 }
 
 func(v *MyValidator) Exec(s interface{}) map[string][]string{
+	// custom validation
+	_ = v.RegisterValidation("uniqueInDB", func(fl validator.FieldLevel) bool {
+		if fl.FieldName() == "Slug" {
+			return !v.Repo.SlugExists(fl.Field().String())
+		}
+		return false
+	})
 	return errorMessage(v.Struct(s))
 }
 
@@ -34,6 +43,8 @@ func errorMessage(err error) map[string][]string {
 				errorMessage = fmt.Sprintf("%s  must be at least %s character in length.", err.Field(), err.Param())
 			case "max":
 				errorMessage = fmt.Sprintf("%s   must be a maximum of %s characters in length.", err.Field(), err.Param())
+			case "uniqueInDB":
+				errorMessage = fmt.Sprintf("%s's value: %s already in use.", err.Field(), err.Value())
 			}
 			errorMessages[err.StructField()] = append(errorMessages[err.StructField()], errorMessage)
 		}

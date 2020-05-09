@@ -13,6 +13,27 @@
                 {{ end }}
             </div>
             <div class="form-group">
+                <label for="inputTitle">Slug</label>
+                <input type="text" name="slug" class="form-control {{ if .Errors.Slug}}is-invalid{{ end }}" id="inputSlug" placeholder="Slug" value="{{ if .Inputs }}{{ .Inputs.Slug }}{{ end }}">
+                {{ if .Errors.Slug }}
+                    {{ range $value := .Errors.Slug }}
+                        <div class="invalid-feedback">{{ $value }}</div>
+                    {{ end }}
+                {{ end }}
+            </div>
+            <div class="form-group">
+                <label for="inputTitle">Tags</label>
+                <input type="text" name="tags" class="form-control {{ if .Errors.Tags}}is-invalid{{ end }}" id="inputTags" placeholder="Tags" value="{{ if .Inputs }}{{range $i, $a := .Inputs.Tags}}{{if gt $i 0 }},{{end}}{{ .Name }}{{end}}{{end}}">
+                <small class="form-text text-muted">
+                    split on a comma
+                </small>
+                {{ if .Errors.Tags }}
+                    {{ range $value := .Errors.Tags }}
+                        <div class="invalid-feedback">{{ $value }}</div>
+                    {{ end }}
+                {{ end }}
+            </div>
+            <div class="form-group">
                 <div class="form-group">
                     <label for="inputDescription">Description</label>
                     <textarea name="description" class="form-control {{ if .Errors.Description }}is-invalid{{ end }}" id="inputDescription" rows="3">{{ if .Inputs }}{{ .Inputs.Description }}{{ end }}</textarea>

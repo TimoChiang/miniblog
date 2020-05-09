@@ -4,8 +4,10 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql" // use _ to execute package's init function only
+	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 	"testing"
 	"time"
 )
@@ -34,7 +36,7 @@ func setup() {
 	db.SetMaxOpenConns(100)
 	articleRepo = new(articleRepository)
 	articleRepo.Db = db
-	ensureTableExists()
+	initialTables()
 	prepareTestForArticle()
 }
 
@@ -50,25 +52,27 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-func ensureTableExists() {
-	if _, err := articleRepo.Db.Exec(createArticleQuery); err != nil {
-		log.Fatal(err)
+func initialTables() {
+	file, err := ioutil.ReadFile("../../blog.sql")
+	if err != nil {
+		panic(err)
+	}
+
+	requests := strings.Split(string(file), ";\n")
+	for _, request := range requests {
+		if request != "" {
+			_, err := articleRepo.Db.Exec(request)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
 	}
 }
 
 func clearTable() {
 	articleRepo.Db.Exec("DELETE FROM articles")
 	articleRepo.Db.Exec("ALTER TABLE articles AUTO_INCREMENT = 1")
+	articleRepo.Db.Exec("DELETE FROM tags")
+	articleRepo.Db.Exec("ALTER TABLE tags AUTO_INCREMENT = 1")
+	articleRepo.Db.Exec("DELETE FROM articles_tags")
 }
-
-
-const createArticleQuery = `
-	CREATE TABLE IF NOT EXISTS articles (
-	id int(11) unsigned NOT NULL AUTO_INCREMENT,
-	title varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL,
-	description text CHARACTER SET utf8mb4,
-	created_at datetime DEFAULT CURRENT_TIMESTAMP,
-	updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	PRIMARY KEY (id)
-	) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
-`
